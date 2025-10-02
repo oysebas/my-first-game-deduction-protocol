@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deduction Protocol</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .timer, .attempts {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .timer.warning {
+            color: #ff6b6b;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .bottles-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            gap: 10px;
+        }
+
+        .bottle {
+            width: 80px;
+            height: 120px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 4px solid transparent;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .bottle:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .bottle.selected {
+            border-color: #fff;
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        .bottle.red { background: linear-gradient(135deg, #ff6b6b, #ee5a52); }
+        .bottle.green { background: linear-gradient(135deg, #51cf66, #37b24d); }
+        .bottle.blue { background: linear-gradient(135deg, #4dabf7, #339af0); }
+        .bottle.pink { background: linear-gradient(135deg, #f783ac, #e64980); }
+        .bottle.yellow { background: linear-gradient(135deg, #ffd43b, #fab005); }
+
+        .bottle.swapping {
+            animation: swap 0.5s ease-in-out;
+        }
+
+        @keyframes swap {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+            100% { transform: translateY(0); }
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .confirm-btn {
+            background: linear-gradient(135deg, #51cf66, #37b24d);
+            color: white;
+            box-shadow: 0 4px 15px rgba(81, 207, 102, 0.4);
+        }
+
+        .confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(81, 207, 102, 0.6);
+        }
+
+        .confirm-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feedback.show {
+            background: linear-gradient(135deg, #ffd43b, #fab005);
+            animation: feedbackPop 0.5s ease;
+        }
+
+        @keyframes feedbackPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .modal p {
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .modal button {
+            margin-top: 20px;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #495057;
+        }
+
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .start-screen h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .start-screen p {
+            font-size: 1.1em;
+            color: #495057;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px 50px;
+            font-size: 1.5em;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .game-area {
+            display: none;
+        }
+
+        .game-area.active {
+            display: block;
+        }
+            .bottle {
+                width: 60px;
+                height: 100px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .info-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>⚗️ Deduction Protocol</h1>
+        
+        <div class="start-screen" id="startScreen">
+            <h2>Ready to Test Your Logic?</h2>
+            <p>Match the hidden sequence of colored bottles using only the feedback of how many are correct. You have 2 minutes!</p>
+            <button class="start-btn" id="startBtn">Start Game</button>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="instructions">
+                <h3>How to Play:</h3>
+                <ul>
+                    <li><strong>Tap two bottles</strong> to swap their positions</li>
+                    <li>Arrange them to match the hidden sequence</li>
+                    <li>Press <strong>Confirm</strong> to check your guess</li>
+                    <li>You'll see how many bottles are in the <strong>correct position</strong></li>
+                    <li>Use logic to deduce which positions are correct</li>
+                    <li>Solve it before time runs out!</li>
+                </ul>
+            </div>
+
+            <div class="info-bar">
+                <div class="timer" id="timer">Time: 2:00</div>
+                <div class="attempts" id="attempts">Attempts: 0</div>
+            </div>
+
+            <div class="bottles-container" id="bottlesContainer"></div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <div class="controls">
+                <button class="confirm-btn" id="confirmBtn">Confirm Guess</button>
+                <button class="reset-btn" id="resetBtn">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle"></h2>
+            <p id="modalMessage"></p>
+            <div class="bottles-container" id="solutionBottles"></div>
+            <button class="reset-btn" onclick="location.reload()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const colors = ['red', 'green', 'blue', 'pink', 'yellow'];
+        let solution = [];
+        let playerGuess = [];
+        let selectedBottle = null;
+        let timeLeft = 120;
+        let timerInterval = null;
+        let attempts = 0;
+        let gameStartTime = null;
+        let gameActive = false;
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function initGame() {
+            solution = shuffleArray(colors);
+            playerGuess = shuffleArray(colors);
+            selectedBottle = null;
+            timeLeft = 120;
+            attempts = 0;
+            gameStartTime = Date.now();
+            gameActive = true;
+            
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameArea').classList.add('active');
+            
+            renderBottles();
+            updateTimer();
+            updateAttempts();
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').classList.remove('show');
+            
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function renderBottles() {
+            const container = document.getElementById('bottlesContainer');
+            container.innerHTML = '';
+            
+            playerGuess.forEach((color, index) => {
+                const bottle = document.createElement('div');
+                bottle.className = `bottle ${color}`;
+                bottle.dataset.index = index;
+                
+                bottle.addEventListener('click', () => selectBottle(index));
+                container.appendChild(bottle);
+            });
+        }
+
+        function selectBottle(index) {
+            if (!gameActive) return;
+            
+            const bottles = document.querySelectorAll('.bottle');
+            
+            if (selectedBottle === null) {
+                selectedBottle = index;
+                bottles[index].classList.add('selected');
+            } else if (selectedBottle === index) {
+                selectedBottle = null;
+                bottles[index].classList.remove('selected');
+            } else {
+                // Add swap animation
+                bottles[selectedBottle].classList.add('swapping');
+                bottles[index].classList.add('swapping');
+                
+                // Swap the colors
+                [playerGuess[selectedBottle], playerGuess[index]] = [playerGuess[index], playerGuess[selectedBottle]];
+                
+                // Wait for animation to complete before re-rendering
+                setTimeout(() => {
+                    renderBottles();
+                    selectedBottle = null;
+                }, 500);
+            }
+        }
+
+        function checkGuess() {
+            if (!gameActive) return;
+            
+            attempts++;
+            updateAttempts();
+            
+            let correct = 0;
+            for (let i = 0; i < 5; i++) {
+                if (playerGuess[i] === solution[i]) {
+                    correct++;
+                }
+            }
+            
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = `${correct} Correct`;
+            feedback.classList.add('show');
+            
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 2000);
+            
+            if (correct === 5) {
+                winGame();
+            }
+        }
+
+        function updateTimer() {
+            if (!gameActive) return;
+            
+            timeLeft--;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const timerEl = document.getElementById('timer');
+            timerEl.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 60) {
+                timerEl.classList.add('warning');
+            }
+            
+            if (timeLeft <= 0) {
+                loseGame();
+            }
+        }
+
+        function updateAttempts() {
+            document.getElementById('attempts').textContent = `Attempts: ${attempts}`;
+        }
+
+        function winGame() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            
+            const timeTaken = Math.floor((Date.now() - gameStartTime) / 1000);
+            const minutes = Math.floor(timeTaken / 60);
+            const seconds = timeTaken % 60;
+            
+            showModal(
+                '🎉 You Won!',
+                `Time: ${minutes}:${seconds.toString().padStart(2, '0')}<br>Attempts: ${attempts}`
+            );
+        }
+
+        function loseGame() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            
+            showModal(
+                '⏰ Time\'s Up!',
+                `Better luck next time!<br>Attempts: ${attempts}`
+            );
+        }
+
+        function showModal(title, message) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').innerHTML = message;
+            
+            const solutionContainer = document.getElementById('solutionBottles');
+            solutionContainer.innerHTML = '<p style="margin-bottom: 15px; font-weight: bold; color: #667eea;">The Solution Was:</p>';
+            
+            solution.forEach(color => {
+                const bottle = document.createElement('div');
+                bottle.className = `bottle ${color}`;
+                bottle.style.cursor = 'default';
+                
+                solutionContainer.appendChild(bottle);
+            });
+            
+            document.getElementById('modal').classList.add('show');
+        }
+
+        document.getElementById('startBtn').addEventListener('click', initGame);
+        document.getElementById('confirmBtn').addEventListener('click', checkGuess);
+        document.getElementById('resetBtn').addEventListener('click', initGame);
+    </script>
+</body>
+</html>
