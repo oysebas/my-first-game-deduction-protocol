@@ -66,8 +66,21 @@
         .bottles-container {
             display: flex;
             justify-content: space-around;
-            margin: 30px 0;
+            margin: 20px 0 15px 0;
             gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .bottles-container.hard-mode {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bottle-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 5px 0;
         }
 
         .bottle {
@@ -97,6 +110,12 @@
         .bottle.blue { background: linear-gradient(135deg, #4dabf7, #339af0); }
         .bottle.pink { background: linear-gradient(135deg, #f783ac, #e64980); }
         .bottle.yellow { background: linear-gradient(135deg, #ffd43b, #fab005); }
+        .bottle.purple { background: linear-gradient(135deg, #9775fa, #845ef7); }
+        .bottle.orange { background: linear-gradient(135deg, #ff922b, #fd7e14); }
+        .bottle.cyan { background: linear-gradient(135deg, #22b8cf, #15aabf); }
+        .bottle.lime { background: linear-gradient(135deg, #a9e34b, #94d82d); }
+        .bottle.coral { background: linear-gradient(135deg, #ff8787, #ff6b6b); }
+        .bottle.hotpink { background: linear-gradient(135deg, #ff6bcb, #e64980); }
 
         .bottle.swapping {
             animation: swap 0.5s ease-in-out;
@@ -112,7 +131,21 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            margin-top: 30px;
+            margin-top: 15px;
+            align-items: center;
+        }
+
+        .main-menu-link {
+            margin-top: 10px;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+
+        .main-menu-link:hover {
+            color: #764ba2;
+            text-decoration: underline;
         }
 
         button {
@@ -159,7 +192,7 @@
             text-align: center;
             font-size: 1.5em;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 10px 0;
             padding: 15px;
             border-radius: 10px;
             min-height: 60px;
@@ -195,6 +228,89 @@
         .modal.show {
             display: flex;
             animation: fadeIn 0.3s ease;
+        }
+
+        .update-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            text-align: center;
+            max-width: 400px;
+            animation: slideIn 0.5s ease;
+            opacity: 0;
+        }
+
+        .update-notification.show {
+            opacity: 1;
+        }
+
+        .update-notification.hide {
+            animation: slideOut 0.5s ease forwards;
+        }
+
+        .update-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .update-overlay.show {
+            opacity: 1;
+        }
+
+        .update-overlay.hide {
+            opacity: 0;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translate(-50%, -60%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+            to {
+                transform: translate(-50%, -40%);
+                opacity: 0;
+            }
+        }
+
+        .update-notification h3 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .update-notification p {
+            color: #495057;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .update-notification .icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
         }
 
         @keyframes fadeIn {
@@ -273,17 +389,65 @@
             line-height: 1.6;
         }
 
+        .difficulty-section {
+            margin: 30px 0;
+        }
+
+        .difficulty-section h3 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .difficulty-btn {
+            background: #e9ecef;
+            color: #adb5bd;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .difficulty-btn:hover:not(.selected) {
+            background: #dee2e6;
+            transform: translateY(-2px);
+        }
+
+        .difficulty-btn.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
         .start-btn {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             padding: 20px 50px;
             font-size: 1.5em;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin-bottom: 40px;
         }
 
         .start-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .start-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
         .game-area {
@@ -310,13 +474,31 @@
     </style>
 </head>
 <body>
+    <div class="update-overlay" id="updateOverlay"></div>
+    
+    <div class="update-notification" id="updateNotification">
+        <div class="icon">🎉</div>
+        <h3>New Update!</h3>
+        <p><strong>Difficulty Modes Added!</strong><br>Choose between Easy (1 min), Normal (2 min), or Hard (5 min) modes!</p>
+    </div>
+
     <div class="game-container">
         <h1>⚗️ Deduction Protocol</h1>
         
         <div class="start-screen" id="startScreen">
             <h2>Ready to Test Your Logic?</h2>
-            <p>Match the hidden sequence of colored bottles using only the feedback of how many are correct. You have 2 minutes!</p>
-            <button class="start-btn" id="startBtn">Start Game</button>
+            <p>Match the hidden sequence of colored bottles using only the feedback of how many are correct.<i><b> (Select a difficulty mode to start the game)</b></i></p>
+            
+            <button class="start-btn" id="startBtn" disabled>Start Game</button>
+            
+            <div class="difficulty-section">
+                <h3>Difficulty Mode:</h3>
+                <div class="difficulty-buttons">
+                    <button class="difficulty-btn" data-difficulty="easy">Easy (3 Color   )</button>
+                    <button class="difficulty-btn" data-difficulty="normal">Normal (5 Colors)</button>
+                    <button class="difficulty-btn" data-difficulty="hard">Hard (10 Color)</button>
+                </div>
+            </div>
         </div>
 
         <div class="game-area" id="gameArea">
@@ -344,6 +526,7 @@
             <div class="controls">
                 <button class="confirm-btn" id="confirmBtn">Confirm Guess</button>
                 <button class="reset-btn" id="resetBtn">New Game</button>
+                <a href="#" class="main-menu-link" id="mainMenuLink">Main Menu</a>
             </div>
         </div>
     </div>
@@ -358,7 +541,12 @@
     </div>
 
     <script>
-        const colors = ['red', 'green', 'blue', 'pink', 'yellow'];
+        const easyColors = ['red', 'blue', 'yellow'];
+        const normalColors = ['red', 'green', 'blue', 'pink', 'yellow'];
+        const hardColors = ['red', 'yellow', 'blue', 'purple', 'orange', 'coral', 'hotpink', 'lime', 'green', 'cyan'];
+        
+        let colors = normalColors;
+        let difficulty = null;
         let solution = [];
         let playerGuess = [];
         let selectedBottle = null;
@@ -367,6 +555,25 @@
         let attempts = 0;
         let gameStartTime = null;
         let gameActive = false;
+
+        // Show update notification on page load
+        window.addEventListener('load', function() {
+            const notification = document.getElementById('updateNotification');
+            const overlay = document.getElementById('updateOverlay');
+            
+            notification.classList.add('show');
+            overlay.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.add('hide');
+                overlay.classList.add('hide');
+                
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                    overlay.style.display = 'none';
+                }, 500);
+            }, 3000);
+        });
 
         function shuffleArray(array) {
             const arr = [...array];
@@ -381,7 +588,16 @@
             solution = shuffleArray(colors);
             playerGuess = shuffleArray(colors);
             selectedBottle = null;
-            timeLeft = 120;
+            
+            // Set time based on difficulty
+            if (difficulty === 'easy') {
+                timeLeft = 60; // 1 minute
+            } else if (difficulty === 'normal') {
+                timeLeft = 120; // 2 minutes
+            } else if (difficulty === 'hard') {
+                timeLeft = 300; // 5 minutes
+            }
+            
             attempts = 0;
             gameStartTime = Date.now();
             gameActive = true;
@@ -403,14 +619,41 @@
             const container = document.getElementById('bottlesContainer');
             container.innerHTML = '';
             
-            playerGuess.forEach((color, index) => {
-                const bottle = document.createElement('div');
-                bottle.className = `bottle ${color}`;
-                bottle.dataset.index = index;
+            if (difficulty === 'hard') {
+                container.classList.add('hard-mode');
                 
-                bottle.addEventListener('click', () => selectBottle(index));
-                container.appendChild(bottle);
-            });
+                // Create two rows for hard mode
+                const row1 = document.createElement('div');
+                row1.className = 'bottle-row';
+                const row2 = document.createElement('div');
+                row2.className = 'bottle-row';
+                
+                playerGuess.forEach((color, index) => {
+                    const bottle = document.createElement('div');
+                    bottle.className = `bottle ${color}`;
+                    bottle.dataset.index = index;
+                    bottle.addEventListener('click', () => selectBottle(index));
+                    
+                    if (index < 5) {
+                        row1.appendChild(bottle);
+                    } else {
+                        row2.appendChild(bottle);
+                    }
+                });
+                
+                container.appendChild(row1);
+                container.appendChild(row2);
+            } else {
+                container.classList.remove('hard-mode');
+                
+                playerGuess.forEach((color, index) => {
+                    const bottle = document.createElement('div');
+                    bottle.className = `bottle ${color}`;
+                    bottle.dataset.index = index;
+                    bottle.addEventListener('click', () => selectBottle(index));
+                    container.appendChild(bottle);
+                });
+            }
         }
 
         function selectBottle(index) {
@@ -447,7 +690,7 @@
             updateAttempts();
             
             let correct = 0;
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < colors.length; i++) {
                 if (playerGuess[i] === solution[i]) {
                     correct++;
                 }
@@ -461,7 +704,7 @@
                 feedback.classList.remove('show');
             }, 2000);
             
-            if (correct === 5) {
+            if (correct === colors.length) {
                 winGame();
             }
         }
@@ -519,20 +762,82 @@
             const solutionContainer = document.getElementById('solutionBottles');
             solutionContainer.innerHTML = '<p style="margin-bottom: 15px; font-weight: bold; color: #667eea;">The Solution Was:</p>';
             
-            solution.forEach(color => {
-                const bottle = document.createElement('div');
-                bottle.className = `bottle ${color}`;
-                bottle.style.cursor = 'default';
+            if (difficulty === 'hard') {
+                solutionContainer.classList.add('hard-mode');
                 
-                solutionContainer.appendChild(bottle);
-            });
+                const row1 = document.createElement('div');
+                row1.className = 'bottle-row';
+                const row2 = document.createElement('div');
+                row2.className = 'bottle-row';
+                
+                solution.forEach((color, index) => {
+                    const bottle = document.createElement('div');
+                    bottle.className = `bottle ${color}`;
+                    bottle.style.cursor = 'default';
+                    
+                    if (index < 5) {
+                        row1.appendChild(bottle);
+                    } else {
+                        row2.appendChild(bottle);
+                    }
+                });
+                
+                solutionContainer.appendChild(row1);
+                solutionContainer.appendChild(row2);
+            } else {
+                solutionContainer.classList.remove('hard-mode');
+                
+                solution.forEach(color => {
+                    const bottle = document.createElement('div');
+                    bottle.className = `bottle ${color}`;
+                    bottle.style.cursor = 'default';
+                    solutionContainer.appendChild(bottle);
+                });
+            }
             
             document.getElementById('modal').classList.add('show');
         }
 
+        // Difficulty selection
+        const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+        const startBtn = document.getElementById('startBtn');
+        
+        difficultyButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                difficultyButtons.forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                difficulty = this.dataset.difficulty;
+                
+                // Set colors based on difficulty
+                if (difficulty === 'easy') {
+                    colors = easyColors;
+                } else if (difficulty === 'normal') {
+                    colors = normalColors;
+                } else if (difficulty === 'hard') {
+                    colors = hardColors;
+                }
+                
+                startBtn.disabled = false;
+            });
+        });
+        
         document.getElementById('startBtn').addEventListener('click', initGame);
         document.getElementById('confirmBtn').addEventListener('click', checkGuess);
         document.getElementById('resetBtn').addEventListener('click', initGame);
+        
+        // Main menu link
+        document.getElementById('mainMenuLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (timerInterval) clearInterval(timerInterval);
+            gameActive = false;
+            document.getElementById('gameArea').classList.remove('active');
+            document.getElementById('startScreen').style.display = 'block';
+            
+            // Reset difficulty selection
+            difficultyButtons.forEach(b => b.classList.remove('selected'));
+            startBtn.disabled = true;
+            difficulty = null;
+        });
     </script>
 </body>
 </html>
