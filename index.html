@@ -65,12 +65,12 @@
 
         .bottles-container {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             margin: 20px 0 15px 0;
             gap: 10px;
             flex-wrap: nowrap;
             overflow-x: auto;
-            padding: 15px 0;
+            padding: 15px 10px;
         }
 
         .bottles-container.hard-mode {
@@ -95,6 +95,7 @@
             border: 4px solid transparent;
             position: relative;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
         }
 
         .bottle:hover {
@@ -522,7 +523,7 @@
         
         <div class="start-screen" id="startScreen">
             <h2>Ready to Test Your Logic?</h2>
-            <p>Match the hidden sequence of colored bottles using only the feedback of how many are correct. <i><b>(Select a difficulty mode to start the game)</b></i></p>
+            <p>Match the hidden sequence of colored bottles using only the feedback of how many are correct.</p>
             
             <button class="start-btn" id="startBtn" disabled>Start Game</button>
             
@@ -657,27 +658,59 @@
             if (difficulty === 'hard') {
                 container.classList.add('hard-mode');
                 
-                // Create two rows for hard mode
-                const row1 = document.createElement('div');
-                row1.className = 'bottle-row';
-                const row2 = document.createElement('div');
-                row2.className = 'bottle-row';
+                // Check if mobile (screen width <= 768px for better tablet support)
+                const isMobile = window.innerWidth <= 768;
                 
-                playerGuess.forEach((color, index) => {
-                    const bottle = document.createElement('div');
-                    bottle.className = `bottle ${color}`;
-                    bottle.dataset.index = index;
-                    bottle.addEventListener('click', () => selectBottle(index));
+                if (isMobile) {
+                    // Mobile: Create three rows (3, 3, 4)
+                    const row1 = document.createElement('div');
+                    row1.className = 'bottle-row';
+                    const row2 = document.createElement('div');
+                    row2.className = 'bottle-row';
+                    const row3 = document.createElement('div');
+                    row3.className = 'bottle-row';
                     
-                    if (index < 5) {
-                        row1.appendChild(bottle);
-                    } else {
-                        row2.appendChild(bottle);
-                    }
-                });
-                
-                container.appendChild(row1);
-                container.appendChild(row2);
+                    playerGuess.forEach((color, index) => {
+                        const bottle = document.createElement('div');
+                        bottle.className = `bottle ${color}`;
+                        bottle.dataset.index = index;
+                        bottle.addEventListener('click', () => selectBottle(index));
+                        
+                        if (index < 3) {
+                            row1.appendChild(bottle);
+                        } else if (index < 6) {
+                            row2.appendChild(bottle);
+                        } else {
+                            row3.appendChild(bottle);
+                        }
+                    });
+                    
+                    container.appendChild(row1);
+                    container.appendChild(row2);
+                    container.appendChild(row3);
+                } else {
+                    // Desktop: Create two rows (5, 5)
+                    const row1 = document.createElement('div');
+                    row1.className = 'bottle-row';
+                    const row2 = document.createElement('div');
+                    row2.className = 'bottle-row';
+                    
+                    playerGuess.forEach((color, index) => {
+                        const bottle = document.createElement('div');
+                        bottle.className = `bottle ${color}`;
+                        bottle.dataset.index = index;
+                        bottle.addEventListener('click', () => selectBottle(index));
+                        
+                        if (index < 5) {
+                            row1.appendChild(bottle);
+                        } else {
+                            row2.appendChild(bottle);
+                        }
+                    });
+                    
+                    container.appendChild(row1);
+                    container.appendChild(row2);
+                }
             } else {
                 container.classList.remove('hard-mode');
                 
@@ -690,6 +723,17 @@
                 });
             }
         }
+
+        // Add window resize listener to re-render bottles on orientation/size change
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            if (gameActive && difficulty === 'hard') {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    renderBottles();
+                }, 250);
+            }
+        });
 
         function selectBottle(index) {
             if (!gameActive) return;
@@ -806,25 +850,57 @@
             if (difficulty === 'hard') {
                 bottlesWrapper.classList.add('hard-mode');
                 
-                const row1 = document.createElement('div');
-                row1.className = 'bottle-row';
-                const row2 = document.createElement('div');
-                row2.className = 'bottle-row';
+                // Check if mobile (screen width <= 768px)
+                const isMobile = window.innerWidth <= 768;
                 
-                solution.forEach((color, index) => {
-                    const bottle = document.createElement('div');
-                    bottle.className = `bottle ${color}`;
-                    bottle.style.cursor = 'default';
+                if (isMobile) {
+                    // Mobile: Create three rows (3, 3, 4)
+                    const row1 = document.createElement('div');
+                    row1.className = 'bottle-row';
+                    const row2 = document.createElement('div');
+                    row2.className = 'bottle-row';
+                    const row3 = document.createElement('div');
+                    row3.className = 'bottle-row';
                     
-                    if (index < 5) {
-                        row1.appendChild(bottle);
-                    } else {
-                        row2.appendChild(bottle);
-                    }
-                });
-                
-                bottlesWrapper.appendChild(row1);
-                bottlesWrapper.appendChild(row2);
+                    solution.forEach((color, index) => {
+                        const bottle = document.createElement('div');
+                        bottle.className = `bottle ${color}`;
+                        bottle.style.cursor = 'default';
+                        
+                        if (index < 3) {
+                            row1.appendChild(bottle);
+                        } else if (index < 6) {
+                            row2.appendChild(bottle);
+                        } else {
+                            row3.appendChild(bottle);
+                        }
+                    });
+                    
+                    bottlesWrapper.appendChild(row1);
+                    bottlesWrapper.appendChild(row2);
+                    bottlesWrapper.appendChild(row3);
+                } else {
+                    // Desktop: Create two rows (5, 5)
+                    const row1 = document.createElement('div');
+                    row1.className = 'bottle-row';
+                    const row2 = document.createElement('div');
+                    row2.className = 'bottle-row';
+                    
+                    solution.forEach((color, index) => {
+                        const bottle = document.createElement('div');
+                        bottle.className = `bottle ${color}`;
+                        bottle.style.cursor = 'default';
+                        
+                        if (index < 5) {
+                            row1.appendChild(bottle);
+                        } else {
+                            row2.appendChild(bottle);
+                        }
+                    });
+                    
+                    bottlesWrapper.appendChild(row1);
+                    bottlesWrapper.appendChild(row2);
+                }
             } else {
                 solution.forEach(color => {
                     const bottle = document.createElement('div');
