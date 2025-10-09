@@ -68,7 +68,9 @@
             justify-content: space-around;
             margin: 20px 0 15px 0;
             gap: 10px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 15px 0;
         }
 
         .bottles-container.hard-mode {
@@ -81,6 +83,7 @@
             justify-content: center;
             gap: 10px;
             margin: 5px 0;
+            padding: 15px 0;
         }
 
         .bottle {
@@ -313,6 +316,28 @@
             margin-bottom: 10px;
         }
 
+        @media (max-width: 600px) {
+            .update-notification {
+                padding: 25px 30px;
+                max-width: 320px;
+            }
+
+            .update-notification h3 {
+                font-size: 1.2em;
+                margin-bottom: 10px;
+            }
+
+            .update-notification p {
+                font-size: 0.9em;
+                line-height: 1.5;
+            }
+
+            .update-notification .icon {
+                font-size: 2em;
+                margin-bottom: 8px;
+            }
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -325,6 +350,9 @@
             text-align: center;
             max-width: 500px;
             animation: slideUp 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         @keyframes slideUp {
@@ -342,6 +370,13 @@
             font-size: 1.2em;
             margin: 10px 0;
             color: #333;
+        }
+
+        .modal #solutionBottles {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
 
         .modal button {
@@ -487,16 +522,16 @@
         
         <div class="start-screen" id="startScreen">
             <h2>Ready to Test Your Logic?</h2>
-            <p>Match the hidden sequence of colored bottles using only the feedback of how many are correct.<i><b> (Select a difficulty mode to start the game)</b></i></p>
+            <p>Match the hidden sequence of colored bottles using only the feedback of how many are correct. <i><b>(Select a difficulty mode to start the game)</b></i></p>
             
             <button class="start-btn" id="startBtn" disabled>Start Game</button>
             
             <div class="difficulty-section">
                 <h3>Difficulty Mode:</h3>
                 <div class="difficulty-buttons">
-                    <button class="difficulty-btn" data-difficulty="easy">Easy (3 Color   )</button>
-                    <button class="difficulty-btn" data-difficulty="normal">Normal (5 Colors)</button>
-                    <button class="difficulty-btn" data-difficulty="hard">Hard (10 Color)</button>
+                    <button class="difficulty-btn" data-difficulty="easy">Easy (3 Colors - 1 min)</button>
+                    <button class="difficulty-btn" data-difficulty="normal">Normal (5 Colors - 2 min)</button>
+                    <button class="difficulty-btn" data-difficulty="hard">Hard (10 Colors - 5 min)</button>
                 </div>
             </div>
         </div>
@@ -760,10 +795,16 @@
             document.getElementById('modalMessage').innerHTML = message;
             
             const solutionContainer = document.getElementById('solutionBottles');
-            solutionContainer.innerHTML = '<p style="margin-bottom: 15px; font-weight: bold; color: #667eea;">The Solution Was:</p>';
+            solutionContainer.innerHTML = '<p style="margin-bottom: 15px; font-weight: bold; color: #667eea; text-align: center;">The Solution Was:</p>';
+            
+            const bottlesWrapper = document.createElement('div');
+            bottlesWrapper.style.display = 'flex';
+            bottlesWrapper.style.justifyContent = 'center';
+            bottlesWrapper.style.gap = '10px';
+            bottlesWrapper.style.flexWrap = 'wrap';
             
             if (difficulty === 'hard') {
-                solutionContainer.classList.add('hard-mode');
+                bottlesWrapper.classList.add('hard-mode');
                 
                 const row1 = document.createElement('div');
                 row1.className = 'bottle-row';
@@ -782,19 +823,18 @@
                     }
                 });
                 
-                solutionContainer.appendChild(row1);
-                solutionContainer.appendChild(row2);
+                bottlesWrapper.appendChild(row1);
+                bottlesWrapper.appendChild(row2);
             } else {
-                solutionContainer.classList.remove('hard-mode');
-                
                 solution.forEach(color => {
                     const bottle = document.createElement('div');
                     bottle.className = `bottle ${color}`;
                     bottle.style.cursor = 'default';
-                    solutionContainer.appendChild(bottle);
+                    bottlesWrapper.appendChild(bottle);
                 });
             }
             
+            solutionContainer.appendChild(bottlesWrapper);
             document.getElementById('modal').classList.add('show');
         }
 
