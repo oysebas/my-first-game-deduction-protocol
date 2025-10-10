@@ -711,6 +711,45 @@
                     container.appendChild(row1);
                     container.appendChild(row2);
                 }
+            } else if (difficulty === 'normal') {
+                container.classList.remove('hard-mode');
+                
+                // Check if mobile (screen width <= 768px)
+                const isMobile = window.innerWidth <= 768;
+                
+                if (isMobile) {
+                    // Mobile: Create two rows (3, 2)
+                    container.classList.add('hard-mode');
+                    const row1 = document.createElement('div');
+                    row1.className = 'bottle-row';
+                    const row2 = document.createElement('div');
+                    row2.className = 'bottle-row';
+                    
+                    playerGuess.forEach((color, index) => {
+                        const bottle = document.createElement('div');
+                        bottle.className = `bottle ${color}`;
+                        bottle.dataset.index = index;
+                        bottle.addEventListener('click', () => selectBottle(index));
+                        
+                        if (index < 3) {
+                            row1.appendChild(bottle);
+                        } else {
+                            row2.appendChild(bottle);
+                        }
+                    });
+                    
+                    container.appendChild(row1);
+                    container.appendChild(row2);
+                } else {
+                    // Desktop: Single row
+                    playerGuess.forEach((color, index) => {
+                        const bottle = document.createElement('div');
+                        bottle.className = `bottle ${color}`;
+                        bottle.dataset.index = index;
+                        bottle.addEventListener('click', () => selectBottle(index));
+                        container.appendChild(bottle);
+                    });
+                }
             } else {
                 container.classList.remove('hard-mode');
                 
@@ -727,7 +766,7 @@
         // Add window resize listener to re-render bottles on orientation/size change
         let resizeTimer;
         window.addEventListener('resize', function() {
-            if (gameActive && difficulty === 'hard') {
+            if (gameActive && (difficulty === 'hard' || difficulty === 'normal')) {
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(() => {
                     renderBottles();
@@ -900,6 +939,41 @@
                     
                     bottlesWrapper.appendChild(row1);
                     bottlesWrapper.appendChild(row2);
+                }
+            } else if (difficulty === 'normal') {
+                // Check if mobile (screen width <= 768px)
+                const isMobile = window.innerWidth <= 768;
+                
+                if (isMobile) {
+                    // Mobile: Create two rows (3, 2)
+                    bottlesWrapper.classList.add('hard-mode');
+                    const row1 = document.createElement('div');
+                    row1.className = 'bottle-row';
+                    const row2 = document.createElement('div');
+                    row2.className = 'bottle-row';
+                    
+                    solution.forEach((color, index) => {
+                        const bottle = document.createElement('div');
+                        bottle.className = `bottle ${color}`;
+                        bottle.style.cursor = 'default';
+                        
+                        if (index < 3) {
+                            row1.appendChild(bottle);
+                        } else {
+                            row2.appendChild(bottle);
+                        }
+                    });
+                    
+                    bottlesWrapper.appendChild(row1);
+                    bottlesWrapper.appendChild(row2);
+                } else {
+                    // Desktop: Single row
+                    solution.forEach(color => {
+                        const bottle = document.createElement('div');
+                        bottle.className = `bottle ${color}`;
+                        bottle.style.cursor = 'default';
+                        bottlesWrapper.appendChild(bottle);
+                    });
                 }
             } else {
                 solution.forEach(color => {
