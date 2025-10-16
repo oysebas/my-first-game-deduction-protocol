@@ -493,6 +493,8 @@
         .game-area.active {
             display: block;
         }
+
+        @media (max-width: 600px) {
             .bottle {
                 width: 60px;
                 height: 100px;
@@ -642,6 +644,7 @@
             document.getElementById('gameArea').classList.add('active');
             
             renderBottles();
+            document.getElementById('timer').classList.remove('warning');
             updateTimer();
             updateAttempts();
             document.getElementById('feedback').textContent = '';
@@ -838,6 +841,8 @@
             
             if (timeLeft <= 60) {
                 timerEl.classList.add('warning');
+            } else {
+                timerEl.classList.remove('warning');
             }
             
             if (timeLeft <= 0) {
