@@ -407,6 +407,54 @@
             margin: 5px 0;
         }
 
+        .turn-lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: lightboxFadeIn 0.3s ease;
+        }
+
+        .turn-lightbox-content {
+            background: linear-gradient(135deg, #ffd43b, #fab005);
+            padding: 40px 60px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: lightboxPop 0.5s ease;
+            max-width: 300px;
+            width: 90%;
+        }
+
+        .turn-message {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+
+        @keyframes lightboxFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes lightboxPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes lightboxFadeOut {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(0.8); opacity: 0; }
+        }
+
         .start-screen {
             text-align: center;
             padding: 40px 20px;
@@ -443,6 +491,24 @@
             margin-bottom: 30px;
         }
 
+        .player-mode-section {
+            margin: 30px 0;
+        }
+
+        .player-mode-section h3 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .player-mode-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
         .difficulty-btn {
             background: #e9ecef;
             color: #adb5bd;
@@ -464,6 +530,29 @@
             color: white;
             border-color: #667eea;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .player-mode-btn {
+            background: #e9ecef;
+            color: #adb5bd;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .player-mode-btn:hover:not(.selected) {
+            background: #dee2e6;
+            transform: translateY(-2px);
+        }
+
+        .player-mode-btn.selected {
+            background: linear-gradient(135deg, #51cf66, #37b24d);
+            color: white;
+            border-color: #51cf66;
+            box-shadow: 0 4px 15px rgba(81, 207, 102, 0.4);
         }
 
         .start-btn {
@@ -508,6 +597,30 @@
                 flex-direction: column;
                 gap: 10px;
             }
+
+            .difficulty-buttons, .player-mode-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .difficulty-btn, .player-mode-btn {
+                width: 100%;
+                max-width: 280px;
+                margin: 5px 0;
+            }
+
+            .player-mode-section {
+                margin: 20px 0;
+            }
+
+            .turn-lightbox-content {
+                padding: 30px 40px;
+                max-width: 250px;
+            }
+
+            .turn-message {
+                font-size: 1.4em;
+            }
         }
     </style>
 </head>
@@ -517,7 +630,7 @@
     <div class="update-notification" id="updateNotification">
         <div class="icon">🎉</div>
         <h3>New Update!</h3>
-        <p><strong>Difficulty Modes Added!</strong><br>Choose between Easy (1 min), Normal (2 min), or Hard (5 min) modes!</p>
+        <p><strong>Player Mode Addad!</strong><br>Choose between Single Player or Two Players!</p>
     </div>
 
     <div class="game-container">
@@ -537,6 +650,14 @@
                     <button class="difficulty-btn" data-difficulty="hard">Hard (10 Colors - 5 min)</button>
                 </div>
             </div>
+
+            <div class="player-mode-section">
+                <h3>Player Mode:</h3>
+                <div class="player-mode-buttons">
+                    <button class="player-mode-btn" data-mode="single">Single Player</button>
+                    <button class="player-mode-btn" data-mode="two">Two Players</button>
+                </div>
+            </div>
         </div>
 
         <div class="game-area" id="gameArea">
@@ -550,6 +671,12 @@
                     <li>Use logic to deduce which positions are correct</li>
                     <li>Solve it before time runs out!</li>
                 </ul>
+            </div>
+
+            <div class="turn-lightbox" id="turnLightbox" style="display: none;">
+                <div class="turn-lightbox-content">
+                    <div class="turn-message" id="turnMessage"></div>
+                </div>
             </div>
 
             <div class="info-bar">
@@ -585,6 +712,7 @@
         
         let colors = normalColors;
         let difficulty = null;
+        let playerMode = null;
         let solution = [];
         let playerGuess = [];
         let selectedBottle = null;
@@ -593,6 +721,9 @@
         let attempts = 0;
         let gameStartTime = null;
         let gameActive = false;
+        let currentPlayer = 1;
+        let player1Guess = [];
+        let player2Guess = [];
 
         // Show update notification on page load
         window.addEventListener('load', function() {
@@ -624,8 +755,17 @@
 
         function initGame() {
             solution = shuffleArray(colors);
-            playerGuess = shuffleArray(colors);
             selectedBottle = null;
+            
+            // Initialize player guesses for two-player mode
+            if (playerMode === 'two') {
+                player1Guess = shuffleArray(colors);
+                player2Guess = shuffleArray(colors);
+                currentPlayer = 1;
+                playerGuess = [...player1Guess];
+            } else {
+                playerGuess = shuffleArray(colors);
+            }
             
             // Set time based on difficulty
             if (difficulty === 'easy') {
@@ -642,6 +782,10 @@
             
             document.getElementById('startScreen').style.display = 'none';
             document.getElementById('gameArea').classList.add('active');
+            
+            // Hide turn lightbox initially
+            const turnLightbox = document.getElementById('turnLightbox');
+            turnLightbox.style.display = 'none';
             
             renderBottles();
             document.getElementById('timer').classList.remove('warning');
@@ -804,6 +948,46 @@
             }
         }
 
+        function showTurnLightbox() {
+            if (playerMode === 'two') {
+                const turnLightbox = document.getElementById('turnLightbox');
+                const turnMessage = document.getElementById('turnMessage');
+                
+                turnMessage.textContent = `Player ${currentPlayer}'s Turn`;
+                turnLightbox.style.display = 'flex';
+                
+                // Hide lightbox after 2 seconds with fade out animation
+                setTimeout(() => {
+                    turnLightbox.style.animation = 'lightboxFadeOut 0.3s ease forwards';
+                    setTimeout(() => {
+                        turnLightbox.style.display = 'none';
+                        turnLightbox.style.animation = 'lightboxFadeIn 0.3s ease';
+                    }, 300);
+                }, 2000);
+            }
+        }
+
+        function switchPlayer() {
+            if (playerMode === 'two') {
+                // Save current player's guess
+                if (currentPlayer === 1) {
+                    player1Guess = [...playerGuess];
+                    currentPlayer = 2;
+                    playerGuess = [...player2Guess];
+                } else {
+                    player2Guess = [...playerGuess];
+                    currentPlayer = 1;
+                    playerGuess = [...player1Guess];
+                }
+                
+                // Re-render bottles with new player's guess
+                renderBottles();
+                
+                // Show turn switch lightbox
+                showTurnLightbox();
+            }
+        }
+
         function checkGuess() {
             if (!gameActive) return;
             
@@ -827,6 +1011,11 @@
             
             if (correct === colors.length) {
                 winGame();
+            } else if (playerMode === 'two') {
+                // Switch to next player after a short delay
+                setTimeout(() => {
+                    switchPlayer();
+                }, 1000);
             }
         }
 
@@ -995,6 +1184,7 @@
 
         // Difficulty selection
         const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+        const playerModeButtons = document.querySelectorAll('.player-mode-btn');
         const startBtn = document.getElementById('startBtn');
         
         difficultyButtons.forEach(btn => {
@@ -1012,9 +1202,24 @@
                     colors = hardColors;
                 }
                 
-                startBtn.disabled = false;
+                checkStartButton();
             });
         });
+
+        // Player mode selection
+        playerModeButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                playerModeButtons.forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                playerMode = this.dataset.mode;
+                
+                checkStartButton();
+            });
+        });
+
+        function checkStartButton() {
+            startBtn.disabled = !(difficulty && playerMode);
+        }
         
         document.getElementById('startBtn').addEventListener('click', initGame);
         document.getElementById('confirmBtn').addEventListener('click', checkGuess);
@@ -1028,10 +1233,12 @@
             document.getElementById('gameArea').classList.remove('active');
             document.getElementById('startScreen').style.display = 'block';
             
-            // Reset difficulty selection
+            // Reset difficulty and player mode selection
             difficultyButtons.forEach(b => b.classList.remove('selected'));
+            playerModeButtons.forEach(b => b.classList.remove('selected'));
             startBtn.disabled = true;
             difficulty = null;
+            playerMode = null;
         });
     </script>
 </body>
